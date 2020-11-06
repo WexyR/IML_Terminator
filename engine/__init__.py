@@ -3,7 +3,7 @@ import time
 import numpy as np
 import resources
 import os
-import sys
+import cv2
 
 from qibullet import SimulationManager
 from qibullet import PepperVirtual
@@ -25,12 +25,17 @@ class Engine:
                     cubeRGB,
                     cubeSize)
         time.sleep(0.07)
+
         img = self.__agent.getCameraFrame(self._camera_handle)
+        shape = (len(img), len(img[0]))
+        ratio = 25 / 100
+        img = cv2.resize(img, (int(shape[1] * ratio), int(shape[0] * ratio)), interpolation=cv2.INTER_AREA)
+
         sensors = self.__agent.getFrontLaserValue()
         cube.remove()
         return (img, sensors, cubeRGB, cubeSize)
 
-    def genDataset(self, output_path, size, nthreads=1, seed=None):
+    def genDataset(self, output_path, size, seed=None):
         r = random.Random(seed)
         img=[]
         sensors=[]
@@ -70,5 +75,3 @@ if __name__ == "__main__":
     X = list(zip(dataset['img'], dataset['sensors']))
     y = list(zip(dataset['cubeRGB'], dataset['cubeSize']))
     print(f"first element of the database is:\nX: {X[0]}\ny: {y[0]}")
-
-
