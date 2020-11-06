@@ -1,14 +1,13 @@
 import random
 import time
-import datetime
 import numpy as np
 import resources
 import os
+import sys
 
 from qibullet import SimulationManager
 from qibullet import PepperVirtual
 from engine.cube import Cube
-from matplotlib import pyplot as plt
 
 class Engine:
     def __init__(self):
@@ -38,6 +37,8 @@ class Engine:
         cubeRGB=[]
         cubeSize=[]
         for i in range(size):
+            print(f"\rGenerating data... [{'='*int(20*i/size)}>{' '*int(20-20*i/size)}] {i}/{size}",end='')
+
             line = engine.genClassData(r.random() + 0.5,  # CubeRho
                                       r.random() * np.pi / 3 - np.pi / 6,  # CubeTeta
                                       r.random() * 2 * np.pi,  # CubeRotZ
@@ -50,15 +51,24 @@ class Engine:
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         np.savez(output_path, img=img, sensors=sensors, cubeRGB=cubeRGB, cubeSize=cubeSize)
 
-if __name__ == "__main__":
-    engine = Engine()
+    def stop(self):
+        self.__simulation_manager.stopSimulation(self.__client_id)
 
-    size = 10
-    dataset_path = os.path.join(resources.DATASETS, f"dataset.npz")
+if __name__ == "__main__":
+
+    dataset_path = os.path.join(resources.DATASETS, 'dataset.npz')
     if not os.path.exists(dataset_path):
-        engine.genDataset(dataset_path, size)
-        print(f'generated and saved dataset at "{dataset_path}"')
+        print('starting generating dataset...')
+        engine = Engine()
+        engine.genDataset(dataset_path, 1000)
+        engine.stop()
+        print(f"generated and saved dataset at '{dataset_path}'")
 
     dataset=np.load(dataset_path)
-    print(f'loaded previously generated dataset at "{dataset_path}"')
+    print(f"loaded previously generated dataset at '{dataset_path}'")
+
+    X = list(zip(dataset['img'], dataset['sensors']))
+    y = list(zip(dataset['cubeRGB'], dataset['cubeSize']))
+    print(f"first element of the database is:\nX: {X[0]}\ny: {y[0]}")
+
 
