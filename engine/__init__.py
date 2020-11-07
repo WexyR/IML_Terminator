@@ -1,13 +1,13 @@
 import random
 import time
 import numpy as np
-import resources
 import os
 import cv2
 
 from qibullet import SimulationManager
 from qibullet import PepperVirtual
 from engine.cube import Cube
+from engine.colors import Colors
 
 class Engine:
     def __init__(self):
@@ -33,7 +33,7 @@ class Engine:
 
         sensors = self.__agent.getFrontLaserValue()
         cube.remove()
-        return (img, sensors, cubeRGB, cubeSize)
+        return (img, sensors, cubeRGB, cubeSize, Colors.classifiate(cubeRGB))
 
     def genDataset(self, output_path, size, seed=None):
         r = random.Random(seed)
@@ -41,6 +41,7 @@ class Engine:
         sensors=[]
         cubeRGB=[]
         cubeSize=[]
+        class_id=[]
         for i in range(size):
             print(f"\rGenerating data... [{'='*int(20*i/size)}>{' '*int(20-20*i/size)}] {i}/{size}",end='')
 
@@ -53,8 +54,15 @@ class Engine:
             sensors+=[line[1]]
             cubeRGB+=[line[2]]
             cubeSize+=[line[3]]
+            class_id+=[line[4]]
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        np.savez(output_path, img=img, sensors=sensors, cubeRGB=cubeRGB, cubeSize=cubeSize)
+        np.savez(output_path,
+                 img=img,
+                 sensors=sensors,
+                 cubeRGB=cubeRGB,
+                 cubeSize=cubeSize,
+                 class_id=class_id,
+                 labels=[color.name for color in Colors])
 
     def stop(self):
         self.__simulation_manager.stopSimulation(self.__client_id)
