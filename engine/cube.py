@@ -1,9 +1,12 @@
 import pybullet as p
+
+# Should be done only once
+p.connect(p.DIRECT)
+
 from engine.utils import euler_to_quaternion
 
 class Cube:
     def __init__(self, position, rotEuler, rgb=(0,0,0), collision=False, size=1.0):
-        p.connect(p.DIRECT)
         real_size = size*0.125
         self.visual_id = p.createVisualShape(p.GEOM_BOX,
                                           rgbaColor=list(rgb)+[1],
