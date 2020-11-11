@@ -1,8 +1,4 @@
 import pybullet as p
-
-# Should be done only once
-p.connect(p.DIRECT)
-
 from engine.utils import euler_to_quaternion
 
 class Cube:
