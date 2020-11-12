@@ -42,7 +42,11 @@ class Engine:
 
         sensors = self.__agent.getFrontLaserValue()
         cube.remove()
-        return (img, sensors, cubeRGB, cubeSize, Colors.classifiate(cubeRGB))
+        return (np.array(img, dtype=np.uint8),
+                         np.array(sensors, dtype=np.float16),
+                         np.array(cubeRGB, dtype=np.uint8),
+                         np.array(cubeSize, dtype=np.float16),
+                         np.array(Colors.classifiate(cubeRGB), dtype=np.uint8))
 
     def genDataset(self, output_path, size, seed=None, debug=False):
         r = random.Random(seed)
@@ -51,20 +55,42 @@ class Engine:
         cubeRGB=[]
         cubeSize=[]
         class_id=[]
-        for i in range(size):
-            print(f"\rGenerating data... [{'='*int(20*i/size)}>{' '*int(20-20*i/size)}] {i}/{size}",end='')
+
+        i = 1
+        time_start = time.time()
+        last_step = 0.0
+        av_speed = 1.0
+        sensors_fail_count = 0
+        while i<=size:
+            av_speed = 0.90*av_speed+0.1/(time.time()-last_step)
+            last_step = time.time()
+            eta = (time.time()-time_start)/i*(size-i)
+            print(f"\rGenerating data... [{'='*int(20*i/size)}>{' '*int(20-20*i/size)}] {i}/{size}, "
+                  f"ETA {int(eta/60)}min{int(eta%60)}, "
+                  f"Current speed is {round(av_speed,2)} per second, "
+                  f"Sensors fail rate is {round(sensors_fail_count/i*100,2)}%",end='')
 
             line = self.genClassData(r.random() + 0.5,  # CubeRho
                                       r.random() * np.pi / 3 - np.pi / 6,  # CubeTeta
                                       r.random() * 2 * np.pi,  # CubeRotZ
                                       (r.random(), r.random(), r.random()),  # RGB
                                       r.random() * 1.5 + 0.5)
-            img+=[line[0]]
+            sensors_ok = False
+            for j in line[1]:
+                if j != 3.0:
+                    sensors_ok = True
+                    break
+
+            if not sensors_ok:
+                sensors_fail_count+=1
+                continue
 
             if debug:
                 plt.imshow(line[0], interpolation="bilinear")
                 plt.show()
 
+            i+=1
+            img+=[line[0]]
             sensors+=[line[1]]
             cubeRGB+=[line[2]]
             cubeSize+=[line[3]]
