@@ -11,7 +11,7 @@ class_id = np.array(db['class_id'], dtype=np.uint8)
 
 i = 0
 index = 0
-size=1000
+size=2000
 while index < len(img):
     i+=1
     new_index = min(index+size, len(img))
