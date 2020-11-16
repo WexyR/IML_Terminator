@@ -4,6 +4,7 @@ from engine.utils import euler_to_quaternion
 class Cube:
     def __init__(self, position, rotEuler, rgb=(0,0,0), collision=False, size=1.0):
         real_size = size*0.125
+        position = (position[0], float(position[1])*0.125, position[2])
         self.visual_id = p.createVisualShape(p.GEOM_BOX,
                                           rgbaColor=list(rgb)+[1],
                                           halfExtents=[real_size, real_size, real_size])

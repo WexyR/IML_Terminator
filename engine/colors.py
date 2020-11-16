@@ -1,7 +1,10 @@
-from enum import Enum
+from enum import Enum, unique
 import numpy as np
 
-class Colors(Enum):
+class _Colors(Enum):
+    """
+    deprecated
+    """
     MAROON = [0.5, 0.0, 0.0]
     RED = [1.0, 0.0, 0.0]
     ORANGE = [1.0, 0.65, 0.0]
@@ -22,14 +25,53 @@ class Colors(Enum):
 
     @staticmethod
     def classifiate(rgb):
+        """
+
+        Parameters
+        ----------
+        rgb a size 3 int tuple describing a color
+
+        Returns the class id of this color determined using least square distance
+        -------
+
+        """
+
         selected = -1
         dist = 100000
         tmp = 0
         index = -1
-        for entry in Colors:
+        for entry in _Colors:
             index+=1
             tmp = np.sum((entry.value[i] - rgb[i]) ** 2 for i in range(3))
             if tmp < dist:
                 selected = index
                 dist = tmp
         return selected
+
+@unique
+class Colors(Enum):
+    BLACK=0
+    RED=1
+    GREEN=2
+    YELLOW=3
+    BLUE=4
+    MAGENTA=5
+    CYAN=6
+    WHITE=7
+
+    def next_random_colors(N=1, rgb_factor=1):
+        """
+        Parameters
+        ----------
+        N is the size of the output vector
+        rgb_factor affects the rgb format. 255 means a 0-255 color format
+
+        Returns a tuple (tags, colors), tags being the index of the class, and colors a generated rgb
+        -------
+        """
+        assert N>0
+        val = np.clip(np.random.normal(loc=0, scale=0.1581, size=3*N), -0.5, 0.5)
+        res = np.where(val<0, 1+val, val)
+        tag = np.packbits(np.array_split(np.rint(res).astype(np.uint8), N), axis=1, bitorder="little")
+        res *= rgb_factor
+        return tag.transpose()[0], np.array_split(res, N)
