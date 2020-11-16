@@ -1,7 +1,7 @@
 import numpy as np
-from resources import SAMPLE_DATASET
+from resources import GENERATED_DATASET
 
-db = np.load(SAMPLE_DATASET)
+db = np.load(GENERATED_DATASET)
 _db = dict()
 img = np.array(db['img'], copy=True, dtype=np.uint8)
 sensors = np.array(db['sensors'], dtype=np.float16)
@@ -11,11 +11,11 @@ class_id = np.array(db['class_id'], dtype=np.uint8)
 
 i = 0
 index = 0
-size=5000
+size=1000
 while index < len(img):
     i+=1
     new_index = min(index+size, len(img))
-    np.savez(SAMPLE_DATASET.split('.npz')[0]+f"_{index}-{new_index-1}.npz",
+    np.savez(GENERATED_DATASET.split('.npz')[0]+f"_{index}-{new_index-1}.npz",
              img=img[index:new_index],
              sensors=sensors[index:new_index],
              cubeRGB=cubeRGB[index:new_index],
