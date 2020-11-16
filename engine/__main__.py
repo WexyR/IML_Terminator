@@ -8,7 +8,7 @@ if __name__ == "__main__":
     if not os.path.exists(dataset_path):
         print('starting generating dataset...')
         engine = Engine()
-        engine.genDataset(dataset_path, 10, fixMissingSensors=False)
+        engine.genDataset(dataset_path, 2000, fixMissingSensors=False)
         engine.stop()
         print(f"generated and saved dataset at '{dataset_path}'")
 

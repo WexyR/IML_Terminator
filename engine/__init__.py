@@ -22,7 +22,7 @@ class Engine:
         self.__camera_handle = self.__agent.subscribeCamera(PepperVirtual.ID_CAMERA_BOTTOM)
 
     def genClassData(self, cube_rho, cube_teta, cube_rot, cubeRGB, cubeSize):
-        cube = Cube((np.cos(cube_teta)*cube_rho, np.sin(cube_teta)*cube_rho, cubeSize),
+        cube = Cube((np.cos(cube_teta)*cube_rho, np.sin(cube_teta)*cube_rho, cubeSize/2),
                     (cube_rot, 0, 0),
                     cubeRGB,
                     cubeSize)
