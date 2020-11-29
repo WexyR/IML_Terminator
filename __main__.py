@@ -27,16 +27,17 @@ if __name__ == "__main__":
         while p.isConnected():
             rgb = [p.readUserDebugParameter(id) for id in rgb_ids] + [1]
             p.changeVisualShape(cube.body, -1, rgbaColor=rgb)
+            time.sleep(0.2)
     t1 = threading.Thread(target=update_rgb)
     t1.start()
 
     while p.isConnected():
         t0 = time.time()
-        X = engine.screenshot(skip_frame=False)
+        X = engine.screenshot()
         data = [np.array([entry]) for entry in X]
         #print(f'screenshot:{time.time()-t0}')
         t0 = time.time()
-        predicate = classifier.predict(data)
+        predicate = classifier.predict(data, workers=6, use_multiprocessing=True)
         #print(f'predict:{time.time()-t0}')
         print(list(Colors)[np.argmax(predicate)])
     t1.join()
