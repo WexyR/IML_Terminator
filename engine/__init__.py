@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import cv2
-import pybullet as p
 
 from qibullet import SimulationManager, Camera
 from qibullet import PepperVirtual
@@ -12,14 +11,14 @@ from engine.cube import Cube
 from engine.colors import Colors
 
 class Engine:
-    def __init__(self):
-        self.__simulation_manager = SimulationManager()
-        self.__client_id = self.__simulation_manager.launchSimulation(gui=False)
-        self.__agent = self.__simulation_manager.spawnPepper(
-            self.__client_id,
+    def __init__(self, gui=False):
+        self._simulation_manager = SimulationManager()
+        self._client_id = self._simulation_manager.launchSimulation(gui=gui)
+        self._agent = self._simulation_manager.spawnPepper(
+            self._client_id,
             spawn_ground_plane=True)
-        self.__laser_handle = self.__agent.subscribeLaser()
-        self.__camera_handle = self.__agent.subscribeCamera(PepperVirtual.ID_CAMERA_BOTTOM)
+        self._laser_handle = self._agent.subscribeLaser()
+        self._camera_handle = self._agent.subscribeCamera(PepperVirtual.ID_CAMERA_BOTTOM)
 
     def genClassData(self, cube_rho, cube_teta, cube_rot, cubeRGB, cubeSize):
         cube = Cube((np.cos(cube_teta)*cube_rho, np.sin(cube_teta)*cube_rho, cubeSize/2),
@@ -27,24 +26,27 @@ class Engine:
                     cubeRGB,
                     cubeSize)
 
-        # Skipping a frame before saving
-        img = Camera._getCameraFromHandle(self.__camera_handle).frame
-        for i in range(2):
-            tmp = img
-            while img is tmp:
-                time.sleep(0.01)
-                img = Camera._getCameraFromHandle(self.__camera_handle).frame
+        data = self.screenshot()
+        cube.remove()
+        return (*data, np.array(cubeSize, dtype=np.float16))
 
+    def screenshot(self, skip_frame=True):
+        # Skipping a frame before saving
+        img = Camera._getCameraFromHandle(self._camera_handle).frame
+        if skip_frame:
+            for i in range(2):
+                tmp = img
+                while img is tmp:
+                    time.sleep(0.01)
+                    img = Camera._getCameraFromHandle(self._camera_handle).frame
         img = img.copy()
         shape = (len(img), len(img[0]))
         ratio = 25 / 100
         img = cv2.resize(img, (int(shape[1] * ratio), int(shape[0] * ratio)), interpolation=cv2.INTER_AREA)
 
-        sensors = self.__agent.getFrontLaserValue()
-        cube.remove()
+        sensors = self._agent.getFrontLaserValue()
         return (np.array(img, dtype=np.uint8),
-                         np.array(sensors, dtype=np.float16),
-                         np.array(cubeSize, dtype=np.float16))
+                np.array(sensors, dtype=np.float16))
 
     def genDataset(self, output_path, size, seed=None, debug=False, fixMissingSensors=True):
         r = random.Random(seed)
@@ -102,4 +104,5 @@ class Engine:
                  labels=[color.name for color in Colors])
 
     def stop(self):
-        self.__simulation_manager.stopSimulation(self.__client_id)
+        self._simulation_manager.stopSimulation(self._client_id)
+

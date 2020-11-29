@@ -91,12 +91,8 @@ class Classifier:
 		}
 		return self.cnn.evaluate(**options)
 
-	def predict(self, **kwargs):
-		options = {"x":[np.asarray(list(zip(*list(self.testset[0])))[0]), np.asarray(list(zip(*list(self.testset[0])))[1])],
-		"y":self.testset[1],
-		**kwargs
-		}
-		return self.cnn.predict(**options)
+	def predict(self, *args, **kwargs):
+		return self.cnn.predict(*args, **kwargs)
 
 	def train_valid_test_split(self, ratio=(0.4, 0.3, 0.3), **kwargs):
 		assert self.dataset is not None
