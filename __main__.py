@@ -6,6 +6,7 @@ from classifier import Classifier
 from engine import Engine, Cube, Colors
 import pybullet as p
 import numpy as np
+import random
 
 
 if __name__ == "__main__":
@@ -21,8 +22,11 @@ if __name__ == "__main__":
                   p.addUserDebugParameter("rho", 0.5, 1.5, 1),
                          p.addUserDebugParameter("angle", 0, 360, 0))
     cube_size = p.addUserDebugParameter("size", 0.5, 2.0, 1.0)
+    last_cube_update = time.time()
 
-    def update_rgb():
+
+    def update_debug_parameters():
+        global last_cube_update
         cube = None
         last_pos, last_angle, last_size = (None, None, None)
         while p.isConnected():
@@ -34,9 +38,10 @@ if __name__ == "__main__":
             pos = (np.cos(_theta)*_rho, np.sin(_theta)*_rho, _cube_size/2.0)
             if last_pos!=pos or last_angle!=_angle or last_size!=_cube_size:
                 if cube is not None:
+                    last_cube_removal = time.time()
                     cube.remove()
                 cube = Cube(pos,
-                            (0, _angle, 0),
+                            (_angle, 0, 0),
                             rgb,
                             _cube_size)
                 last_pos = pos
@@ -47,8 +52,55 @@ if __name__ == "__main__":
                 p.changeVisualShape(cube.body, -1, rgbaColor=rgb)
             time.sleep(0.2)
 
-    t1 = threading.Thread(target=update_rgb)
+    def pepper_track_object():
+        found_left, found_right, found_mid = False, False, False
+        while p.isConnected():
+            if time.time() - last_cube_update < 2:
+                found_left, found_right, found_mid = False, False, False
+                time.sleep(0.5)
+            right, mid, left = (engine._agent.getRightLaserValue(),engine._agent.getFrontLaserValue(),engine._agent.getLeftLaserValue())
+
+            found_mid = False
+            for j in mid:
+                if j < 2.8:
+                    found_mid = True
+                    found_left = False
+                    found_right = False
+                    break
+            if not found_mid:
+                for j in right:
+                    if j < 2.8:
+                        found_right = True
+                        found_left = False
+                    break
+                for j in left:
+                    if j < 2.8:
+                        found_left = True
+                        found_right = False
+                    break
+                if not found_right:
+                    if found_left:
+                        engine._agent.move(0, 0, np.pi / 2.0)
+                    else:
+                        if random.random()>0.5:
+                            found_left = True
+                        else:
+                            found_right = True
+                else:
+                    engine._agent.move(0, 0, -np.pi / 2.0)
+            else:
+                tmp=[]
+                for j in range(len(mid)):
+                    if(mid[j] != 3.0):
+                        tmp+=[j]
+                center = np.mean(tmp)
+                dif = (center-len(mid)/2.0)/len(mid)*2.0
+                engine._agent.move(0, 0, -np.pi / 2.0 * dif)
+
+    t1 = threading.Thread(target=update_debug_parameters)
     t1.start()
+    t2 = threading.Thread(target=pepper_track_object)
+    t2.start()
 
     while p.isConnected():
         #t0 = time.time()
@@ -60,7 +112,6 @@ if __name__ == "__main__":
         #print(f'predict:{time.time()-t0}')
         print(list(Colors)[np.argmax(predicate)])
     t1.join()
-
-    # TODO: have pepper face the cube. Enable the user to move the cube
+    t2.join()
 
     engine.stop()

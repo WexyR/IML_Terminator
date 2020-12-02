@@ -104,5 +104,7 @@ class Engine:
                  labels=[color.name for color in Colors])
 
     def stop(self):
+        self._agent.unsubscribeLaser()
+        self._agent.unsubscribeCamera(PepperVirtual.ID_CAMERA_BOTTOM)
         self._simulation_manager.stopSimulation(self._client_id)
 
