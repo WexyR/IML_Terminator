@@ -50,14 +50,24 @@ if __name__ == "__main__":
     t1 = threading.Thread(target=update_rgb)
     t1.start()
 
+    color_debug = {"accuracy":0, "class":None, "overlay_id":None}
     while p.isConnected():
-        #t0 = time.time()
         X = engine.screenshot()
-        data = [np.array([entry]) for entry in X]
-        #print(f'screenshot:{time.time()-t0}')
-        #t0 = time.time()
-        predicate = classifier.predict(data)
-        #print(f'predict:{time.time()-t0}')
+        predicate = classifier.predict([np.array([entry]) for entry in X])
+        index = np.argmax(predicate)
+        color_debug["accuracy"] = predicate.T[index][0]
+        color_debug["class"] = str(list(Colors)[index]).split('.')[1]
+
+        if color_debug["overlay_id"] is not None:
+            p.removeUserDebugItem(color_debug["overlay_id"])
+        color_debug["overlay_id"] = p.addUserDebugText(f"{color_debug['class']} @ {color_debug['accuracy']*100:.1f}%",
+                                        (0, -0.7, 1.5),
+                                        textSize=0.3,
+                                        textColorRGB=(0, 0, 0),
+                                        textOrientation=p.getQuaternionFromEuler((np.pi/2, 0, np.pi/2)),
+                                        parentObjectUniqueId=engine._agent.getRobotModel()
+                                        )
+
         print(list(Colors)[np.argmax(predicate)])
     t1.join()
 
