@@ -1,5 +1,6 @@
 # IML_Terminator
 Louis-Marie Nicolas & Romain Biannic pour M2 SIIA IML.
+Une IA pour Pepper, designée comme une preuve de concept partielle d'aide de vie pour personne malvoyante. Elle est capable de se tourner vers un objet proche, d'identifier sa couleur et de la prononcer à l'oral.
 
 ## Dépendances:
 
