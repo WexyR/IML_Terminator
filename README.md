@@ -1,8 +1,9 @@
 # IML_Terminator
+Louis-Marie Nicolas & Romain Biannic pour M2 SIIA IML.
 
 ## Dépendances:
 
-python 3.6.12, numpy v1.19.2, qibullet v1.4.2, pybullet v3.0.6, tensorflow (and tensorflow.keras) v2.1, opencv v3.4.2, sklearn
+python 3.6.12, numpy v1.19.2, qibullet v1.4.2, pybullet v3.0.6, tensorflow (and tensorflow.keras) v2.1, opencv v3.4.2, sklearn.
 
 ## Premier lancement:
 
