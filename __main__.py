@@ -15,9 +15,9 @@ if __name__ == "__main__":
     classifier = Classifier()
     classifier.load(resources.CNNS)
 
-    rgb_ids = (p.addUserDebugParameter("red", 0, 1, 0.5),
-               p.addUserDebugParameter("green", 0, 1, 0.5),
-               p.addUserDebugParameter("blue", 0, 1, 0.5))
+    rgb_ids = (p.addUserDebugParameter("red", 0, 1, 1),
+               p.addUserDebugParameter("green", 0, 1, 0),
+               p.addUserDebugParameter("blue", 0, 1, 0))
     theta, rho, angle = (p.addUserDebugParameter("theta", 0, 360, 0),
                   p.addUserDebugParameter("rho", 0.5, 1.5, 1),
                          p.addUserDebugParameter("angle", 0, 360, 0))
